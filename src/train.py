@@ -5,6 +5,7 @@ import torch.optim as optim
 from torchvision import transforms
 from data import get_dataloader
 from inpainting_model import InpaintingModel
+from datetime import datetime
 
 from loss_func import compute_loss
 
@@ -79,9 +80,13 @@ def main():
     # Ensure the checkpoints directory exists
     os.makedirs("checkpoints", exist_ok=True)
 
+    # Generate a timestamped filename
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    checkpoint_path = f"checkpoints/inpainting_model_{timestamp}.pth"
+
     # Save trained model
-    print("Saving model...")
-    torch.save(model.state_dict(), "checkpoints/inpainting_model.pth")
+    print(f"Saving model to {checkpoint_path}...")
+    torch.save(model.state_dict(), checkpoint_path)
     print("Model saved.")
 
 if __name__ == "__main__":
