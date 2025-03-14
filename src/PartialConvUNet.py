@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from partial_convolution2d import PartialConvolution2d
+from src.partial_convolution2d import PartialConvolution2d
 
 # So there are going to be 2 paths.
 # First we are going to down sample the image using partial
