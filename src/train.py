@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -54,6 +55,9 @@ def main():
     train(model, dataloader, optimizer, device, num_epochs)
 
     # Save trained model
+    checkpoint_dir = "checkpoints"
+    os.makedirs(checkpoint_dir, exist_ok=True)
+
     torch.save(model.state_dict(), "checkpoints/inpainting_model.pth")
 
 if __name__ == "__main__":
