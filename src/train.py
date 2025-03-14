@@ -32,7 +32,7 @@ def main():
     mask_dir = "dataset/masks"
 
     # Training parameters
-    batch_size = 16
+    batch_size = 64
     num_epochs = 10
     lr = 1e-4
 
