@@ -6,16 +6,16 @@ class PartialConvolution2d(nn.Module):
             self, 
             in_channels, 
             out_channels,
-            kernal_size,
+            kernel_size,
             stride=1,
             padding=0,
             bias=True
         ):
         super(PartialConvolution2d, self).__init__()
 
-        self.conv = nn.Conv2d(in_channels, out_channels, kernal_size, stride, padding, bias=bias)
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
 
-        self.mask_conv = nn.Conv2d(1,1, kernal_size, stride, padding, bias=False)
+        self.mask_conv = nn.Conv2d(1,1, kernel_size, stride, padding, bias=False)
         nn.init.constant_(self.mask_conv.weight, 1.0)
         self.mask_conv.requires_grad_ = False
 
