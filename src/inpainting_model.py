@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from partial_convolution2d import PartialConvolution2d
+from src.partial_convolution2d import PartialConvolution2d
 
 class InpaintingModel(nn.Module):
     def __init__(self):
