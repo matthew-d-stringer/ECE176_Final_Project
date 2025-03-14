@@ -56,5 +56,7 @@ def main():
     # Save trained model
     torch.save(model.state_dict(), "checkpoints/inpainting_model.pth")
 
+    print("Model saved successfully!")    
+
 if __name__ == "__main__":
     main()
