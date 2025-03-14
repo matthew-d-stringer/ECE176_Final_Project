@@ -4,9 +4,12 @@ import skimage.exposure
 import numpy as np
 from numpy.random import default_rng
 
-def generate_blob_mask(image_path, save_path, sigma=15, threshold=175, seedval=75):
+def generate_blob_mask(image_path, save_path, sigma=15, threshold=175):
     img = cv2.imread(image_path)
     height, width = img.shape[:2]
+
+    # Generate a unique seed based on the filename (or use the current time)
+    seedval = hash(image_path) % (2**32)  # Unique seed for each image
 
     rng = default_rng(seed=seedval)
 
