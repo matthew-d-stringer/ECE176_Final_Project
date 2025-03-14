@@ -31,7 +31,7 @@ while image_counter <= max_images:
     resized_image = cv2.resize(frame, (256, 256))
 
     # Save the image with a unique filename
-    img_filename = f"{output_dir}/image_{image_counter}.jpg"
+    img_filename = f"{output_dir}/image{image_counter}.jpg"
     cv2.imwrite(img_filename, resized_image)
     print(f"Image {image_counter} saved to {img_filename}")
 
