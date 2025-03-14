@@ -1,62 +1,54 @@
+import os
 import torch
-import torch.nn as nn
-import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
-from data import get_dataloader
-from inpainting_model import InpaintingModel
+from PIL import Image
+import numpy as np
 
-from loss_func import compute_loss
+class InpaintingDataset(Dataset):
+    def __init__(self, image_dir, mask_dir, transform=None):
+        self.image_dir = image_dir
+        self.mask_dir = mask_dir
+        self.transform = transform
 
-def train(model, dataloader, optimizer, device, num_epochs=10):
-    model.train()
-    
-    for epoch in range(num_epochs):
-        total_loss = 0
-        for corrupted, mask, target in dataloader:
-            corrupted, mask, target = corrupted.to(device), mask.to(device), target.to(device)
-            
-            optimizer.zero_grad()
-            inpainted_output = model(corrupted, mask)  # Forward pass
-            
-            loss = compute_loss(inpainted_output, target, mask)  # Compute loss
-            loss.backward()
-            optimizer.step()
+        # Load all images and masks into memory as numpy arrays
+        self.images = self._load_images(image_dir)
+        self.masks = self._load_images(mask_dir, grayscale=True)
 
-            total_loss += loss.item()
+    def _load_images(self, directory, grayscale=False):
+        images = []
+        for filename in sorted(os.listdir(directory)):
+            image_path = os.path.join(directory, filename)
+            with Image.open(image_path) as img:
+                if grayscale:
+                    img = img.convert("L")  # Convert to grayscale for masks
+                else:
+                    img = img.convert("RGB")  # Convert to RGB for images
+                images.append(np.array(img))
+        return np.array(images)
 
-        print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {total_loss / len(dataloader):.4f}")
+    def __len__(self):
+        return len(self.images)
 
-def main():
-    # Paths
-    image_dir = "dataset/images"
-    mask_dir = "dataset/masks"
+    def __getitem__(self, idx):
+        # Retrieve the preloaded image and mask
+        image = torch.tensor(self.images[idx]).float()
+        mask = torch.tensor(self.masks[idx]).float()
 
-    # Training parameters
-    batch_size = 64
-    num_epochs = 10
-    lr = 1e-4
+        # Apply transformations if needed
+        if self.transform:
+            image = self.transform(image)
+            mask = self.transform(mask)
 
-    # Image transformations
-    transform = transforms.Compose([
-        transforms.Resize((256, 256)),
-        transforms.ToTensor(),
-    ])
+        # Normalize mask to binary values (1 = valid, 0 = missing)
+        mask = (mask > 0).float()
 
-    # Load data
-    dataloader = get_dataloader(image_dir, mask_dir, batch_size=batch_size, transform=transform)
+        # Generate corrupted image (zero-out missing pixels)
+        corrupted_image = image * mask
 
-    # Model setup
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = InpaintingModel().to(device)
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+        return corrupted_image, mask, image  # (Input, Mask, Target)
 
-    # Train
-    train(model, dataloader, optimizer, device, num_epochs)
-
-    # Save trained model
-    torch.save(model.state_dict(), "checkpoints/inpainting_model.pth")
-
-    print("Model saved successfully!")    
-
-if __name__ == "__main__":
-    main()
+def get_dataloader(image_dir, mask_dir, batch_size=16, transform=None):
+    dataset = InpaintingDataset(image_dir, mask_dir, transform)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    return dataloader
