@@ -5,9 +5,7 @@ from torchvision import transforms
 from data import get_dataloader
 from inpainting_model import InpaintingModel
 
-# Define Masked L1 loss (only compute loss on the visible pixels)
-def masked_loss(output, target, mask):
-    return torch.sum((output - target).abs() * mask) / torch.sum(mask)
+from loss_func import compute_loss
 
 def train(model, dataloader, optimizer, device, num_epochs=10):
     model.train()
@@ -20,7 +18,7 @@ def train(model, dataloader, optimizer, device, num_epochs=10):
             optimizer.zero_grad()
             inpainted_output = model(corrupted, mask)  # Forward pass
             
-            loss = masked_loss(inpainted_output, target, mask)  # Compute loss
+            loss = compute_loss(inpainted_output, target, mask)  # Compute loss
             loss.backward()
             optimizer.step()
 
