@@ -3,6 +3,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from PIL import Image
+import numpy as np
 
 class InpaintingDataset(Dataset):
     def __init__(self, image_dir, mask_dir, transform=None):
@@ -10,17 +11,31 @@ class InpaintingDataset(Dataset):
         self.mask_dir = mask_dir
         self.transform = transform
 
-        self.image_paths = sorted(os.listdir(image_dir))
-        self.mask_paths = sorted(os.listdir(mask_dir))
+        # Load all images and masks into memory as numpy arrays
+        self.images = self._load_images(image_dir)
+        self.masks = self._load_images(mask_dir, grayscale=True)
+
+    def _load_images(self, directory, grayscale=False):
+        images = []
+        for filename in sorted(os.listdir(directory)):
+            image_path = os.path.join(directory, filename)
+            with Image.open(image_path) as img:
+                if grayscale:
+                    img = img.convert("L")  # Convert to grayscale for masks
+                else:
+                    img = img.convert("RGB")  # Convert to RGB for images
+                images.append(np.array(img))
+        return np.array(images)
 
     def __len__(self):
-        return len(self.image_paths)
+        return len(self.images)
 
     def __getitem__(self, idx):
-        # Load image and mask
-        image = Image.open(os.path.join(self.image_dir, self.image_paths[idx])).convert("RGB")
-        mask = Image.open(os.path.join(self.mask_dir, self.mask_paths[idx])).convert("L")  # Load as grayscale
+        # Retrieve the preloaded image and mask
+        image = torch.tensor(self.images[idx]).float()
+        mask = torch.tensor(self.masks[idx]).float()
 
+        # Apply transformations if needed
         if self.transform:
             image = self.transform(image)
             mask = self.transform(mask)
