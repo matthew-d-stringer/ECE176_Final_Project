@@ -79,7 +79,7 @@ def process_images(input_folder, output_folder, max_mask_fraction=0.4, fill_colo
         print(f"Saved masked image: {output_path}")
 
 if __name__ == "__main__":
-    input_folder = "input_images"  # Folder containing original images
-    output_folder = "masked_images"  # Folder to save masked images
+    input_folder = "dataset/images"  # Folder containing original images
+    output_folder = "dataset/masked_images"  # Folder to save masked images
 
-    process_images(input_folder, output_folder, max_mask_fraction=0.4, fill_color=None)
+    process_images(input_folder, output_folder, max_mask_fraction=0.15, fill_color=None)
