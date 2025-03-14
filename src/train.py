@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -74,6 +75,9 @@ def main():
     # Train
     print("Starting training...")
     train(model, dataloader, optimizer, device, num_epochs)
+
+    # Ensure the checkpoints directory exists
+    os.makedirs("checkpoints", exist_ok=True)
 
     # Save trained model
     print("Saving model...")
