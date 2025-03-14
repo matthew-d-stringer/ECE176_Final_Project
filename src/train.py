@@ -85,16 +85,9 @@ def main():
     checkpoint_path = f"checkpoints/inpainting_model_{timestamp}.pth"
 
     # Save trained model
-<<<<<<< HEAD
-    checkpoint_dir = "checkpoints"
-    os.makedirs(checkpoint_dir, exist_ok=True)
-
-    torch.save(model.state_dict(), "checkpoints/inpainting_model.pth")
-=======
     print(f"Saving model to {checkpoint_path}...")
     torch.save(model.state_dict(), checkpoint_path)
     print("Model saved.")
->>>>>>> 64d76b776681c1df2b20aa1cdab80f8ec68294b0
 
 if __name__ == "__main__":
     main()
