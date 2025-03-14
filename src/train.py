@@ -12,19 +12,37 @@ def train(model, dataloader, optimizer, device, num_epochs=10):
     
     for epoch in range(num_epochs):
         total_loss = 0
-        for corrupted, mask, target in dataloader:
+        print(f"Epoch {epoch+1}/{num_epochs} started.")
+        
+        for batch_idx, (corrupted, mask, target) in enumerate(dataloader):
+            print(f"  Processing batch {batch_idx+1}/{len(dataloader)}...")
+            
+            # Move data to device
             corrupted, mask, target = corrupted.to(device), mask.to(device), target.to(device)
             
+            # Zero gradients
             optimizer.zero_grad()
-            inpainted_output = model(corrupted, mask)  # Forward pass
             
-            loss = compute_loss(inpainted_output, target, mask)  # Compute loss
+            # Forward pass
+            print(f"    Performing forward pass...")
+            inpainted_output = model(corrupted, mask)
+            
+            # Compute loss
+            print(f"    Computing loss...")
+            loss = compute_loss(inpainted_output, target, mask)
+            
+            # Backward pass
+            print(f"    Backpropagating loss...")
             loss.backward()
+            
+            # Optimizer step
+            print(f"    Updating model weights...")
             optimizer.step()
 
             total_loss += loss.item()
 
-        print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {total_loss / len(dataloader):.4f}")
+        print(f"Epoch [{epoch+1}/{num_epochs}], Average Loss: {total_loss / len(dataloader):.4f}")
+        print(f"Epoch {epoch+1}/{num_epochs} finished.")
 
 def main():
     # Paths
@@ -32,9 +50,9 @@ def main():
     mask_dir = "dataset/masks"
 
     # Training parameters
-    batch_size = 64
-    num_epochs = 10
-    lr = 1e-4
+    batch_size = 32
+    num_epochs = 2
+    lr = 1e-2
 
     # Image transformations
     transform = transforms.Compose([
@@ -43,20 +61,24 @@ def main():
     ])
 
     # Load data
+    print("Loading data...")
     dataloader = get_dataloader(image_dir, mask_dir, batch_size=batch_size, transform=transform)
+    print(f"Data loaded. Total batches: {len(dataloader)}")
 
     # Model setup
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
     model = InpaintingModel().to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     # Train
+    print("Starting training...")
     train(model, dataloader, optimizer, device, num_epochs)
 
     # Save trained model
+    print("Saving model...")
     torch.save(model.state_dict(), "checkpoints/inpainting_model.pth")
-
-    print("Model saved successfully!")    
+    print("Model saved.")
 
 if __name__ == "__main__":
     main()
