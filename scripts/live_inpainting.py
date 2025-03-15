@@ -7,13 +7,14 @@ import matplotlib.pyplot as plt
 import skimage
 from torchvision import transforms
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.inpainting_model import InpaintingModel  # Ensure this is your trained model class
+from src.PartialConvUNet import PartialConvUNet  # Ensure this is your trained model class
 from PIL import Image
+from numpy.random import default_rng
 
 # Load trained model
-MODEL_PATH = "checkpoints/inpainting_model.pth"
+MODEL_PATH = "checkpoints/inpainting_model_20250315_071514.pth"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = InpaintingModel().to(device)
+model = PartialConvUNet().to(device)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model.eval()
 
@@ -23,23 +24,19 @@ transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-# Blob Mask Generator Code
-def generate_blob_mask(image, sigma=15, threshold=175):
-    height, width = image.shape[:2]
+def generate_blob_mask(img, sigma=15, threshold=175):
+    height, width = img.shape[:2]
 
-    # Generate random noise
-    noise = np.random.randint(0, 255, (height, width), dtype=np.uint8)
+    # Generate a unique seed based on the filename (or use the current time)
+    rng = default_rng()
 
-    # Apply Gaussian blur
+    noise = rng.integers(0, 255, (height, width), np.uint8, True)
     blur = cv2.GaussianBlur(noise, (0, 0), sigmaX=sigma, sigmaY=sigma, borderType=cv2.BORDER_DEFAULT)
-    
-    # Stretch intensity
     stretch = skimage.exposure.rescale_intensity(blur, in_range='image', out_range=(0, 255)).astype(np.uint8)
     
-    # Threshold to create binary mask
-    thresh = cv2.threshold(stretch, threshold, 255, cv2.THRESH_BINARY)[1]
+    # **Use THRESH_BINARY_INV to make blobs black and background white**
+    thresh = cv2.threshold(stretch, threshold, 255, cv2.THRESH_BINARY_INV)[1]
 
-    # Morphological operations to clean up the mask
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
     mask = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
