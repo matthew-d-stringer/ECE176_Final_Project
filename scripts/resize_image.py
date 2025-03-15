@@ -17,4 +17,3 @@ def resize_and_save_images(input_dir, output_dir, size=(256, 256)):
 
 for split in ["training", "validation"]:
     resize_and_save_images(f"dataset/images/{split}", f"dataset/images/{split}_resized")
-    resize_and_save_images(f"dataset/masks/{split}", f"dataset/masks/{split}_resized", size=(256, 256))  # Resize masks too
