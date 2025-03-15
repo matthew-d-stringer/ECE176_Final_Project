@@ -53,7 +53,7 @@ def main():
 
     # Training parameters
     batch_size = 32
-    num_epochs = 2
+    num_epochs = 5
     lr = 1e-2
 
     # Image transformations
