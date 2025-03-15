@@ -2,17 +2,6 @@ import torch
 import torch.nn as nn
 from src.partial_convolution2d import PartialConvolution2d
 
-# So there are going to be 2 paths.
-# First we are going to down sample the image using partial
-# convolution
-# By downsampling, we increase the number of channels so that
-# We can capture more complex features
-# In the bottle neck, we are going to do another convolution
-# This convolution will have little affect on the dimensions of the 
-# data
-# It exists in order to extract the higher level patterns
-# Finally, we upsample the features into an image again.
-
 class PartialConvUNet(nn.Module):
     def __init__(self):
         super(PartialConvUNet, self).__init__()
@@ -39,12 +28,7 @@ class PartialConvUNet(nn.Module):
             nn.Sigmoid()  # Ensure output is in the [0,1] range
         )
 
-        # Pooling and Upsampling
-        self.pool = nn.MaxPool2d(2, 2)
-        self.up = nn.Upsample(scale_factor=2, mode='nearest')
-
     def forward(self, x, mask):
-
         # Downsampling Path (Encoder)
         x1, mask1 = self.enc1[0](x, mask)
         x1 = self.enc1[1](x1)
@@ -61,17 +45,29 @@ class PartialConvUNet(nn.Module):
         b2, mask_b2 = self.bottleneck2[0](b1, mask_b1)
         b2 = self.bottleneck2[1](b2)
 
-        # Upsampling Path
-        upsample = lambda x: nn.functional.interpolate(x, scale_factor=2, mode='nearest')
-        mask_upsample = lambda m: nn.functional.interpolate(m, scale_factor=2, mode='nearest', recompute_scale_factor=False)
-
-        d4, mask_d4 = self.dec4[0](torch.cat([upsample(b2), x4], dim=1), mask_upsample(mask4))
+        # Upsampling Path - Ensuring Shape Consistency
+        d4, mask_d4 = self.dec4[0](
+            torch.cat([nn.functional.interpolate(b2, size=x4.shape[2:], mode='nearest'), x4], dim=1),
+            nn.functional.interpolate(mask4, size=x4.shape[2:], mode='nearest')
+        )
         d4 = self.dec4[1](d4)
-        d3, mask_d3 = self.dec3[0](torch.cat([upsample(d4), x3], dim=1), mask_upsample(mask3))
+
+        d3, mask_d3 = self.dec3[0](
+            torch.cat([nn.functional.interpolate(d4, size=x3.shape[2:], mode='nearest'), x3], dim=1),
+            nn.functional.interpolate(mask3, size=x3.shape[2:], mode='nearest')
+        )
         d3 = self.dec3[1](d3)
-        d2, mask_d2 = self.dec2[0](torch.cat([upsample(d3), x2], dim=1), mask_upsample(mask2))
+
+        d2, mask_d2 = self.dec2[0](
+            torch.cat([nn.functional.interpolate(d3, size=x2.shape[2:], mode='nearest'), x2], dim=1),
+            nn.functional.interpolate(mask2, size=x2.shape[2:], mode='nearest')
+        )
         d2 = self.dec2[1](d2)
-        d1, mask_d1 = self.dec1[0](torch.cat([upsample(d2), x1], dim=1), mask_upsample(mask1))
+
+        d1, mask_d1 = self.dec1[0](
+            torch.cat([nn.functional.interpolate(d2, size=x1.shape[2:], mode='nearest'), x1], dim=1),
+            nn.functional.interpolate(mask1, size=x1.shape[2:], mode='nearest')
+        )
         d1 = self.dec1[1](d1)
 
         # Final Output
