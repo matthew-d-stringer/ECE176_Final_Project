@@ -4,8 +4,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import transforms
 from data import get_dataloader
-from inpainting_model import InpaintingModel
 from datetime import datetime
+from PartialConvUNet import PartialConvUNet
 
 from loss_func import compute_loss
 
@@ -70,7 +70,7 @@ def main():
     # Model setup
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
-    model = InpaintingModel().to(device)
+    model = PartialConvUNet().to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
     # Train

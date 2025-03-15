@@ -26,8 +26,8 @@ def generate_blob_mask(image_path, save_path, sigma=15, threshold=175):
     mask_filename = os.path.join(save_path, os.path.basename(image_path).replace('.jpg', '_mask.png'))
     cv2.imwrite(mask_filename, mask)
 
-image_folder = "dataset/images"
-mask_folder = "dataset/masks"
+image_folder = "dataset/images/training"
+mask_folder = "dataset/images/training_masks"
 os.makedirs(mask_folder, exist_ok=True)
 
 for image_file in os.listdir(image_folder):

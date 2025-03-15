@@ -1,4 +1,7 @@
 dataset/
+**/*.zip
+**/*.7z
+ADEChallengeData2016/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

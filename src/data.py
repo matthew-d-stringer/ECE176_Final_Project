@@ -11,11 +11,7 @@ class InpaintingDataset(Dataset):
         self.mask_dir = mask_dir
         self.transform = transform
 
-<<<<<<< HEAD
         # Load all images and masks into memory as numpy arrays
-=======
-        # Load all images and masks into memory
->>>>>>> 64d76b776681c1df2b20aa1cdab80f8ec68294b0
         self.images = self._load_images(image_dir)
         self.masks = self._load_images(mask_dir, grayscale=True)
 
@@ -28,27 +24,16 @@ class InpaintingDataset(Dataset):
                     img = img.convert("L")  # Convert to grayscale for masks
                 else:
                     img = img.convert("RGB")  # Convert to RGB for images
-<<<<<<< HEAD
                 images.append(np.array(img))
         return np.array(images)
-=======
-                images.append(img)  # Store PIL image instead of NumPy array
-        return images
->>>>>>> 64d76b776681c1df2b20aa1cdab80f8ec68294b0
 
     def __len__(self):
         return len(self.images)
 
     def __getitem__(self, idx):
-<<<<<<< HEAD
         # Retrieve the preloaded image and mask
         image = torch.tensor(self.images[idx]).float()
         mask = torch.tensor(self.masks[idx]).float()
-=======
-        # Retrieve preloaded PIL image and mask
-        image = self.images[idx]
-        mask = self.masks[idx]
->>>>>>> 64d76b776681c1df2b20aa1cdab80f8ec68294b0
 
         # Apply transformations if needed
         if self.transform:
