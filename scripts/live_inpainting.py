@@ -12,7 +12,10 @@ from PIL import Image
 from numpy.random import default_rng
 
 # Load trained model
-MODEL_PATH = "checkpoints/inpainting_model_20250315_071514.pth"
+# MODEL_PATH = "checkpoints/inpainting_model_epoch1_20250315_083458_loss0.6210.pth"
+# MODEL_PATH = "checkpoints/inpainting_model_epoch1_20250315_083458_loss0.6210.pth"
+MODEL_PATH = "checkpoints/inpainting_model_20250315_094841.pth"
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = PartialConvUNet().to(device)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
