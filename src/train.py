@@ -54,7 +54,7 @@ def main():
     # Training parameters
     batch_size = 32
     num_epochs = 5
-    lr = 1e-2
+    lr = 1e-4
 
     # Image transformations
     transform = transforms.Compose([
