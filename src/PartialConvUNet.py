@@ -47,26 +47,35 @@ class PartialConvUNet(nn.Module):
     def forward(self, x, mask):
 
         # Downsampling Path (Encoder)
-        x1, mask1 = self.enc1(x, mask)  # Output: (B, 64, H/2, W/2)
-        x2, mask2 = self.enc2(x1, mask1)  # Output: (B, 128, H/4, W/4)
-        x3, mask3 = self.enc3(x2, mask2)  # Output: (B, 256, H/8, W/8)
-        x4, mask4 = self.enc4(x3, mask3)  # Output: (B, 512, H/16, W/16)
+        x1, mask1 = self.enc1[0](x, mask)
+        x1 = self.enc1[1](x1)
+        x2, mask2 = self.enc2[0](x1, mask1)
+        x2 = self.enc2[1](x2)
+        x3, mask3 = self.enc3[0](x2, mask2)
+        x3 = self.enc3[1](x3)
+        x4, mask4 = self.enc4[0](x3, mask3)
+        x4 = self.enc4[1](x4)
 
-        # Bottleneck (Extracting high-level patterns)
-        b1, mask_b1 = self.bottleneck1(x4, mask4)  # Output: (B, 1024, H/16, W/16)
-        b2, mask_b2 = self.bottleneck2(b1, mask_b1)  # Output: (B, 1024, H/16, W/16)
+        # Bottleneck
+        b1, mask_b1 = self.bottleneck1[0](x4, mask4)
+        b1 = self.bottleneck1[1](b1)
+        b2, mask_b2 = self.bottleneck2[0](b1, mask_b1)
+        b2 = self.bottleneck2[1](b2)
 
-        # Upsampling Path (Decoder with Nearest Neighbor Upsampling)
+        # Upsampling Path
         upsample = lambda x: nn.functional.interpolate(x, scale_factor=2, mode='nearest')
+        mask_upsample = lambda m: nn.functional.interpolate(m, scale_factor=2, mode='nearest', recompute_scale_factor=False)
 
-        d4, mask_d4 = self.dec4(torch.cat([upsample(b2), x4], dim=1), upsample(mask4))  
-        d3, mask_d3 = self.dec3(torch.cat([upsample(d4), x3], dim=1), upsample(mask3))  
-        d2, mask_d2 = self.dec2(torch.cat([upsample(d3), x2], dim=1), upsample(mask2))  
-        d1, mask_d1 = self.dec1(torch.cat([upsample(d2), x1], dim=1), upsample(mask1))  
+        d4, mask_d4 = self.dec4[0](torch.cat([upsample(b2), x4], dim=1), mask_upsample(mask4))
+        d4 = self.dec4[1](d4)
+        d3, mask_d3 = self.dec3[0](torch.cat([upsample(d4), x3], dim=1), mask_upsample(mask3))
+        d3 = self.dec3[1](d3)
+        d2, mask_d2 = self.dec2[0](torch.cat([upsample(d3), x2], dim=1), mask_upsample(mask2))
+        d2 = self.dec2[1](d2)
+        d1, mask_d1 = self.dec1[0](torch.cat([upsample(d2), x1], dim=1), mask_upsample(mask1))
+        d1 = self.dec1[1](d1)
 
         # Final Output
-        output = self.final(d1)  
-        # inal Output Layer
         output = self.final(d1)  # Output: (B, 3, H, W) → Reconstructed image
 
         return output
