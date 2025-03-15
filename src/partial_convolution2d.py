@@ -29,7 +29,6 @@ class PartialConvolution2d(nn.Module):
             mask_sum = torch.clamp(mask_sum, min=1e-8)
         
         output = output/mask_sum
-        print(f"mask shape: {mask.shape}, mask_sum shape: {mask_sum.shape}")
-        new_mask = torch.where(mask_sum > 0, torch.ones_like(mask), torch.zeros_like(mask))
+        new_mask = torch.where(mask_sum > 0, torch.ones_like(mask_sum), torch.zeros_like(mask_sum))
 
         return output, new_mask
