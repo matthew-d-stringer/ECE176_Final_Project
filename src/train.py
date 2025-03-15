@@ -32,7 +32,7 @@ def train(model, train_dataloader, val_dataloader, optimizer, device, num_epochs
                 
                 corrupted, mask, target = corrupted.to(device), mask.to(device), target.to(device)
                 optimizer.zero_grad()
-                inpainted_output = model(corrupted, mask)
+                inpainted_output, _ = model(corrupted, mask)
                 loss = compute_loss(inpainted_output, target, mask)
                 loss.backward()
                 optimizer.step()
@@ -52,7 +52,7 @@ def train(model, train_dataloader, val_dataloader, optimizer, device, num_epochs
         with torch.no_grad():
             for corrupted, mask, target in val_dataloader:
                 corrupted, mask, target = corrupted.to(device), mask.to(device), target.to(device)
-                inpainted_output = model(corrupted, mask)
+                inpainted_output, _ = model(corrupted, mask)
                 loss = compute_loss(inpainted_output, target, mask)
                 val_loss += loss.item()
         
