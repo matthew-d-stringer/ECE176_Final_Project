@@ -11,7 +11,7 @@ class InpaintingDataset(Dataset):
         self.mask_dir = mask_dir
         self.transform = transform
 
-        # Load all images and masks into memory as numpy arrays
+        # Load images and masks into RAM as tensors
         self.images = self._load_images(image_dir)
         self.masks = self._load_images(mask_dir, grayscale=True)
 
@@ -24,21 +24,33 @@ class InpaintingDataset(Dataset):
                     img = img.convert("L")  # Convert to grayscale for masks
                 else:
                     img = img.convert("RGB")  # Convert to RGB for images
-                images.append(np.array(img))
-        return np.array(images)
+                
+                img = np.array(img)  # Convert to NumPy array
+                
+                # Convert to PyTorch tensor immediately
+                img_tensor = torch.tensor(img, dtype=torch.float32)
+
+                # Ensure correct shape for PyTorch (C, H, W)
+                if grayscale:
+                    img_tensor = img_tensor.unsqueeze(0)  # (H, W) -> (1, H, W)
+                else:
+                    img_tensor = img_tensor.permute(2, 0, 1)  # (H, W, C) -> (C, H, W)
+                
+                images.append(img_tensor)
+        
+        return torch.stack(images)  # Store all images as a single tensor in RAM
 
     def __len__(self):
         return len(self.images)
 
     def __getitem__(self, idx):
-        # Retrieve the preloaded image and mask
-        image = torch.tensor(self.images[idx]).float()
-        mask = torch.tensor(self.masks[idx]).float()
+        # Retrieve preloaded image and mask
+        image = self.images[idx]
+        mask = self.masks[idx]
 
-        # Apply transformations if needed
+        # Apply transformations to the image only
         if self.transform:
             image = self.transform(image)
-            mask = self.transform(mask)
 
         # Normalize mask to binary values (1 = valid, 0 = missing)
         mask = (mask > 0).float()

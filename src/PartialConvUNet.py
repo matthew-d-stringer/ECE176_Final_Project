@@ -34,7 +34,6 @@ class PartialConvUNet(nn.Module):
         self.dec1 = nn.Sequential(PartialConvolution2d(128+64, 64, kernel_size=3, stride=1, padding=1), nn.ReLU())
 
         # Final output
-        # Final output
         self.final = nn.Sequential(
             nn.Conv2d(64, 3, kernel_size=3, stride=1, padding=1),
             nn.Sigmoid()  # Ensure output is in the [0,1] range
