@@ -48,8 +48,8 @@ def train(model, dataloader, optimizer, device, num_epochs=10):
 
 def main():
     # Paths
-    image_dir = "dataset/images"
-    mask_dir = "dataset/masks"
+    image_dir = "dataset/images/training_resized"
+    mask_dir = "dataset/masks/training_resized"
 
     # Training parameters
     batch_size = 32
