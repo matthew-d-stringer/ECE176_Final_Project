@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from src.partial_convolution2d import PartialConvolution2d
+from partial_convolution2d import PartialConvolution2d
 
 class PartialConvUNet(nn.Module):
     def __init__(self):
@@ -72,5 +72,8 @@ class PartialConvUNet(nn.Module):
 
         # Final Output
         output = self.final(d1)  # Output: (B, 3, H, W) → Reconstructed image
+
+        # Ensure the output matches the original input size
+        output = torch.nn.functional.interpolate(output, size=x.shape[2:], mode='bilinear', align_corners=False)
 
         return output
