@@ -77,10 +77,7 @@ def main():
     print("Starting training...")
     train(model, dataloader, optimizer, device, num_epochs)
 
-    # Ensure the checkpoints directory exists
     os.makedirs("checkpoints", exist_ok=True)
-
-    # Generate a timestamped filename
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     checkpoint_path = f"checkpoints/inpainting_model_{timestamp}.pth"
 

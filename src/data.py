@@ -14,18 +14,15 @@ class InpaintingDataset(Dataset):
         return len(self.image_paths)
 
     def __getitem__(self, idx):
-        # Load image and mask on demand (not preloading)
+        # Load image and mask
         image = Image.open(self.image_paths[idx]).convert("RGB")
         mask = Image.open(self.mask_paths[idx]).convert("L")  # Grayscale for masks
 
-        # Convert to PyTorch tensors with efficient transforms
         image = transforms.ToTensor()(image)  # Normalizes to [0,1] and (C, H, W)
         mask = transforms.ToTensor()(mask)    # Normalizes to [0,1] and (1, H, W)
 
-        # Normalize mask to binary values (1 = valid, 0 = missing)
         mask = (mask > 0).float()
 
-        # Generate corrupted image (zero-out missing pixels)
         corrupted_image = image * mask
 
         return corrupted_image, mask, image  # (Input, Mask, Target)

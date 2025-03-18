@@ -45,7 +45,7 @@ class PartialConvUNet(nn.Module):
         b2, mask_b2 = self.bottleneck2[0](b1, mask_b1)
         b2 = self.bottleneck2[1](b2)
 
-        # Upsampling Path - Ensuring Shape Consistency
+        # Upsampling Path
         d4, mask_d4 = self.dec4[0](
             torch.cat([nn.functional.interpolate(b2, size=x4.shape[2:], mode='nearest'), x4], dim=1),
             nn.functional.interpolate(mask4, size=x4.shape[2:], mode='nearest')
@@ -73,7 +73,6 @@ class PartialConvUNet(nn.Module):
         # Final Output
         output = self.final(d1)  # Output: (B, 3, H, W) → Reconstructed image
 
-        # Ensure the output matches the original input size
         output = torch.nn.functional.interpolate(output, size=x.shape[2:], mode='bilinear', align_corners=False)
 
         return output
