@@ -1,8 +1,6 @@
 # Image Inpainting for Photo Restoration
-
-
-## TODO:
-1. invert mask colours for 
+## YOUTUBE DEMO
+1. [invert mask colours for ](https://youtu.be/d8KHTQhXGj4)
 ## Overview
 This project aims to develop an image inpainting tool that can restore damaged or missing parts of old photographs using deep learning techniques. By leveraging the method of partial convolutions introduced by Liu, Reda, Shih, and others from Nvidia [1], our model will be capable of producing high-quality restorations with minimal distortions typically found in traditional inpainting methods.
 
